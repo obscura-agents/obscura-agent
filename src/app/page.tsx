@@ -1,66 +1,72 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState } from "react";
+import { ReceiptPanel } from "./components/ReceiptPanel";
+import { DossierView } from "./components/DossierView";
+import type { PrivacyReceipt } from "../privacy/receipt";
+import type { Dossier } from "../agent/report";
 
 export default function Home() {
+  const [question, setQuestion] = useState("");
+  const [status, setStatus] = useState("");
+  const [receipts, setReceipts] = useState<PrivacyReceipt[]>([]);
+  const [dossier, setDossier] = useState<Dossier | null>(null);
+  const [running, setRunning] = useState(false);
+
+  async function run() {
+    setReceipts([]);
+    setDossier(null);
+    setRunning(true);
+    setStatus("Starting…");
+    const res = await fetch("/api/research", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n\n");
+      buf = lines.pop() ?? "";
+      for (const line of lines) {
+        const payload = line.replace(/^data: /, "");
+        if (payload === "[DONE]") continue;
+        const ev = JSON.parse(payload);
+        if (ev.type === "status") setStatus(ev.message);
+        if (ev.type === "receipt") setReceipts((r) => [...r, ev.receipt]);
+        if (ev.type === "dossier") {
+          setDossier(ev.dossier);
+          setStatus(`Done (${ev.stoppedReason})`);
+        }
+      }
+    }
+    setRunning(false);
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="app">
+      <h1>GhostWire</h1>
+      <p className="tagline">
+        Private research that leaves no trace. <span className="powered">Powered by Venice</span>
+      </p>
+      <div className="composer">
+        <input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask a research question…"
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <button onClick={run} disabled={running || !question}>
+          {running ? "Investigating…" : "Investigate"}
+        </button>
+      </div>
+      <p className="status">{status}</p>
+      <div className="grid">
+        <ReceiptPanel receipts={receipts} />
+        <DossierView dossier={dossier} />
+      </div>
+    </main>
   );
 }
