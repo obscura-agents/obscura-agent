@@ -76,4 +76,29 @@ describe("runInvestigation", () => {
     expect(result.stoppedReason).toBe("spend_cap");
     expect((client.chat as any)).not.toHaveBeenCalled();
   });
+
+  it("does not hard-fail when getBalance throws (e.g. inference-only key cannot read rate limits)", async () => {
+    const chat = vi.fn().mockResolvedValue({
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "ok" } }],
+      venice_parameters: { enable_e2ee: false },
+    });
+    const client = {
+      chat,
+      embed: vi.fn(),
+      getBalance: vi.fn().mockRejectedValue(new Error("403 forbidden")),
+    } as unknown as VeniceClient;
+
+    const result = await runInvestigation({
+      client,
+      models: models as any,
+      question: "x",
+      maxSteps: 3,
+      minUsd: 0.5,
+      now: () => "t",
+    });
+
+    expect(result.stoppedReason).toBe("completed");
+    expect(result.finalAnswer).toBe("ok");
+    expect(chat).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,5 +1,5 @@
 import type { VeniceClient } from "../venice/client";
-import type { ChatMessage, ModelSpec, WebSearchCitation } from "../venice/types";
+import type { Balance, ChatMessage, ModelSpec, WebSearchCitation } from "../venice/types";
 import { resolveDefaults } from "../venice/models";
 import { buildReceipt, type PrivacyReceipt } from "../privacy/receipt";
 import { TOOL_DEFS } from "../tools/registry";
@@ -51,8 +51,15 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
 
   for (let step = 1; step <= maxSteps; step++) {
     // Spend-cap circuit breaker BEFORE spending on this step.
-    const balance = await args.client.getBalance();
-    if (balance.usd < minUsd) {
+    // Tolerate an unreadable balance (e.g. an inference-only key that cannot
+    // read /api_keys/rate_limits): degrade to "no cap" instead of hard-failing.
+    let balance: Balance | null = null;
+    try {
+      balance = await args.client.getBalance();
+    } catch {
+      balance = null;
+    }
+    if (balance && balance.usd < minUsd) {
       stoppedReason = "spend_cap";
       break;
     }
