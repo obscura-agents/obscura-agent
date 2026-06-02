@@ -1,0 +1,73 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { VeniceClient } from "../../src/venice/client";
+
+function mockFetchOnce(body: unknown, ok = true, status = 200, headers: Record<string, string> = {}) {
+  return vi.fn().mockResolvedValue({
+    ok,
+    status,
+    headers: { get: (k: string) => headers[k.toLowerCase()] ?? null },
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+  });
+}
+
+describe("VeniceClient.chat", () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it("posts to chat/completions with bearer auth and venice_parameters, and parses the response", async () => {
+    const fetchMock = mockFetchOnce({
+      id: "chatcmpl-1",
+      model: "zai-org-glm-4.7",
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "blue" } }],
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+      venice_parameters: { enable_e2ee: false, enable_web_search: "off", web_search_citations: [] },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new VeniceClient({ apiKey: "k" });
+    const res = await client.chat({
+      model: "zai-org-glm-4.7",
+      messages: [{ role: "user", content: "why is the sky blue?" }],
+      venice_parameters: { enable_web_search: "off" },
+    });
+
+    expect(res.choices[0].message.content).toBe("blue");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.venice.ai/api/v1/chat/completions");
+    expect((init as any).headers.Authorization).toBe("Bearer k");
+    const body = JSON.parse((init as any).body);
+    expect(body.venice_parameters.enable_web_search).toBe("off");
+  });
+
+  it("throws a useful error on non-ok responses", async () => {
+    vi.stubGlobal("fetch", mockFetchOnce({ error: "bad" }, false, 400));
+    const client = new VeniceClient({ apiKey: "k" });
+    await expect(
+      client.chat({ model: "m", messages: [{ role: "user", content: "x" }] }),
+    ).rejects.toThrow(/400/);
+  });
+});
+
+describe("VeniceClient.embed", () => {
+  it("returns one vector per input", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetchOnce({ object: "list", model: "text-embedding-bge-m3", data: [{ index: 0, embedding: [0.1, 0.2] }], usage: { prompt_tokens: 1, total_tokens: 1 } }),
+    );
+    const client = new VeniceClient({ apiKey: "k" });
+    const vecs = await client.embed("hello");
+    expect(vecs).toEqual([[0.1, 0.2]]);
+  });
+});
+
+describe("VeniceClient.getBalance", () => {
+  it("reads balances from /api_keys/rate_limits", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetchOnce({ data: { accessPermitted: true, balances: { USD: 12.5, DIEM: 3 } } }),
+    );
+    const client = new VeniceClient({ apiKey: "k" });
+    const bal = await client.getBalance();
+    expect(bal).toEqual({ usd: 12.5, diem: 3, accessPermitted: true });
+  });
+});
