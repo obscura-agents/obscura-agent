@@ -586,6 +586,43 @@ h3 {
   margin-top: 1.2rem;
   display: flex;
   justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* history */
+.history {
+  margin-top: 2rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1.2rem;
+}
+.history h4 {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin: 0 0 0.6rem;
+  font-weight: 400;
+}
+.history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.history li button {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0.28rem 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.3s var(--ease);
+}
+.history li button:hover {
+  color: var(--gold);
 }
 
 /* dispatched-agents plan */

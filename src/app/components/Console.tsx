@@ -4,6 +4,7 @@ import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
 import { dossierToMarkdown } from "../../agent/exportDossier";
 import { DEMO_EVENTS, DEMO_QUESTION } from "./demoScript";
+import { encodeShare } from "./share";
 import { PERSONAS, type PersonaKey } from "../../agent/personas";
 import type { PrivacyReceipt } from "../../privacy/receipt";
 import type { Dossier } from "../../agent/report";
@@ -36,11 +37,55 @@ export function Console() {
   const [model, setModel] = useState<"default" | "uncensored">("default");
   const [persona, setPersona] = useState<PersonaKey>("investigator");
   const [running, setRunning] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState<{ q: string; dossier: Dossier; vault?: string; ts: number }[]>([]);
   const feedRef = useRef<HTMLDivElement>(null);
+  const dossierRef = useRef<Dossier | null>(null);
+  const vaultRef = useRef("");
 
   useEffect(() => {
     feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight });
   }, [activity]);
+
+  useEffect(() => {
+    try {
+      const h = JSON.parse(localStorage.getItem("obscura_history") || "[]");
+      if (Array.isArray(h)) setHistory(h);
+    } catch {
+      // ignore corrupt history
+    }
+  }, []);
+
+  function saveHistory(item: { q: string; dossier: Dossier; vault?: string; ts: number }) {
+    setHistory((prev) => {
+      const next = [item, ...prev].slice(0, 8);
+      try {
+        localStorage.setItem("obscura_history", JSON.stringify(next));
+      } catch {
+        // storage full / unavailable
+      }
+      return next;
+    });
+  }
+
+  function loadHistory(item: { q: string; dossier: Dossier; vault?: string }) {
+    resetState();
+    setQuestion(item.q);
+    setDossier(item.dossier);
+    setVaultText(item.vault || "");
+    dossierRef.current = item.dossier;
+    vaultRef.current = item.vault || "";
+    setStatus("Loaded from history");
+  }
+
+  function copyLink() {
+    if (!dossier) return;
+    const link = `${location.origin}/view#${encodeShare({ q: question, dossier, vault: vaultText || undefined })}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
+  }
 
   function downloadMd() {
     if (!dossier) return;
@@ -80,6 +125,9 @@ export function Console() {
     setPlan([]);
     setActivity([]);
     setIsError(false);
+    setCopied(false);
+    dossierRef.current = null;
+    vaultRef.current = "";
   }
 
   function applyEvent(ev: { type: string; [k: string]: unknown }) {
@@ -88,11 +136,15 @@ export function Console() {
     if (ev.type === "activity")
       setActivity((a) => [...a, { action: String(ev.action), detail: ev.detail ? String(ev.detail) : undefined }]);
     if (ev.type === "plan") setPlan((ev.subtasks as string[]) ?? []);
-    if (ev.type === "vault") setVaultText(String(ev.text));
+    if (ev.type === "vault") {
+      setVaultText(String(ev.text));
+      vaultRef.current = String(ev.text);
+    }
     if (ev.type === "cover") setCover(String(ev.dataUrl));
     if (ev.type === "audio") setAudio(String(ev.dataUrl));
     if (ev.type === "dossier") {
       setDossier(ev.dossier as Dossier);
+      dossierRef.current = ev.dossier as Dossier;
       setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
     }
   }
@@ -151,6 +203,10 @@ export function Console() {
           }
           applyEvent(ev);
         }
+      }
+
+      if (dossierRef.current) {
+        saveHistory({ q, dossier: dossierRef.current, vault: vaultRef.current || undefined, ts: Date.now() });
       }
     } catch (e) {
       setIsError(true);
@@ -330,9 +386,27 @@ export function Console() {
 
         {dossier && (
           <div className="export-bar">
+            <button type="button" className="btn" onClick={copyLink}>
+              {copied ? "✓ Link copied" : "⧉ Copy share link"}
+            </button>
             <button type="button" className="btn" onClick={downloadMd}>
               ⬇ Download .md
             </button>
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="history">
+            <h4>Recent investigations</h4>
+            <ul>
+              {history.map((h, i) => (
+                <li key={i}>
+                  <button type="button" onClick={() => loadHistory(h)}>
+                    {h.q}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
