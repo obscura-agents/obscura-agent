@@ -2,6 +2,8 @@
 
 **The autonomous research agent that leaves no trace.** Powered by [Venice](https://venice.ai).
 
+🔗 **Live:** <https://obscura-agent.vercel.app> — try the "Watch a live demo" button (no key needed), or bring your own Venice key.
+
 Obscura Agent is a privacy-first, agentic research tool built on the Venice.ai API. Give it a
 question; it autonomously plans, searches and scrapes the web, builds a private memory, and returns
 a **sourced, cited dossier** — while proving, step by step, that nothing leaked.
