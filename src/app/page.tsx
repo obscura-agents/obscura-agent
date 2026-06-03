@@ -90,7 +90,7 @@ export default function Home() {
       </section>
 
       {/* ---------- how it works ---------- */}
-      <section className="section">
+      <section className="section" id="how">
         <div className="container">
           <div className="section-head" data-reveal>
             <span className="eyebrow">How it works</span>
@@ -109,7 +109,7 @@ export default function Home() {
       </section>
 
       {/* ---------- why ---------- */}
-      <section className="section">
+      <section className="section" id="why">
         <div className="container">
           <div className="section-head" data-reveal>
             <span className="eyebrow">Why it's different</span>

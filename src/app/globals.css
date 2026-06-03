@@ -83,6 +83,68 @@ a {
   z-index: 3;
 }
 
+/* ---------- top nav ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem clamp(1rem, 4vw, 2.5rem);
+  background: rgba(8, 9, 13, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.nav-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(232, 199, 122, 0.25));
+}
+.nav-links {
+  display: flex;
+  gap: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.nav-links a {
+  transition: color 0.3s var(--ease);
+}
+.nav-links a:hover {
+  color: var(--gold);
+}
+.nav-actions {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  color: var(--muted);
+}
+.nav-actions a {
+  display: inline-flex;
+  transition: color 0.3s var(--ease);
+}
+.nav-actions a:hover {
+  color: var(--gold);
+}
+@media (max-width: 680px) {
+  .nav-links {
+    display: none;
+  }
+}
+
 /* ---------- typography ---------- */
 .eyebrow {
   font-family: var(--font-mono);
@@ -925,6 +987,84 @@ h3 {
 }
 .footer .venice {
   color: var(--gold);
+}
+
+/* ---------- docs page ---------- */
+.doc {
+  padding-bottom: 5rem;
+}
+.doc h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0.6rem 0 0.3rem;
+}
+.doc h2 {
+  font-size: 1.6rem;
+  margin: 2.6rem 0 0.7rem;
+  color: var(--gold);
+  scroll-margin-top: 84px;
+}
+.doc h3 {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin: 1.5rem 0 0.4rem;
+}
+.doc p {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0.6rem 0;
+}
+.doc p strong,
+.doc li strong {
+  color: var(--ink);
+}
+.doc a {
+  color: var(--gold);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease);
+}
+.doc a:hover {
+  border-color: var(--gold-dim);
+}
+.doc ul {
+  margin: 0.6rem 0;
+  padding-left: 1.3rem;
+}
+.doc li {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: var(--muted);
+  padding: 0.2rem 0;
+}
+.doc code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(232, 199, 122, 0.1);
+  color: var(--gold);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+.doc pre {
+  background: #0b0c10;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.doc pre code {
+  background: none;
+  color: var(--ink);
+  padding: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.doc .lede {
+  margin: 0.8rem 0 1rem;
 }
 
 /* ---------- reveal on load ---------- */
