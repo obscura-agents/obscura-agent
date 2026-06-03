@@ -20,6 +20,8 @@ export function Console() {
   const [cover, setCover] = useState<string>("");
   const [audio, setAudio] = useState<string>("");
   const [vaultText, setVaultText] = useState<string>("");
+  const [plan, setPlan] = useState<string[]>([]);
+  const [deep, setDeep] = useState(false);
   const [running, setRunning] = useState(false);
 
   // BYOK — bring your own Venice key (stored only in this browser).
@@ -47,6 +49,7 @@ export function Console() {
     setCover("");
     setAudio("");
     setVaultText("");
+    setPlan([]);
     setIsError(false);
     setRunning(true);
     setStatus("Opening the chamber");
@@ -56,7 +59,7 @@ export function Console() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, ...byok }),
+        body: JSON.stringify({ question: q, deep, ...byok }),
       });
 
       if (!res.ok || !res.body) {
@@ -91,6 +94,7 @@ export function Console() {
             setDossier(ev.dossier as Dossier);
             setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
           }
+          if (ev.type === "plan") setPlan((ev.subtasks as string[]) ?? []);
           if (ev.type === "vault") setVaultText(String(ev.text));
           if (ev.type === "cover") setCover(String(ev.dataUrl));
           if (ev.type === "audio") setAudio(String(ev.dataUrl));
@@ -159,6 +163,19 @@ export function Console() {
           )}
         </div>
 
+        <div className="deepmode">
+          <button
+            type="button"
+            className={`deeptoggle${deep ? " on" : ""}`}
+            onClick={() => setDeep(!deep)}
+          >
+            {deep ? "◉" : "○"} Deep mode
+          </button>
+          <span className="deepmode-note">
+            supervisor dispatches parallel specialist agents · more thorough, more credits
+          </span>
+        </div>
+
         <p className={`status${isError ? " err" : ""}`}>
           {status}
           {running && <span className="blink"> ▍</span>}
@@ -171,6 +188,17 @@ export function Console() {
                 {s}
               </button>
             ))}
+          </div>
+        )}
+
+        {plan.length > 0 && (
+          <div className="panel plan">
+            <h4>⊞ Agents dispatched</h4>
+            <ol>
+              {plan.map((p, i) => (
+                <li key={i}>{p}</li>
+              ))}
+            </ol>
           </div>
         )}
 

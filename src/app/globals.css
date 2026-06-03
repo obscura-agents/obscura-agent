@@ -493,6 +493,57 @@ h3 {
   letter-spacing: 0.04em;
 }
 
+/* deep mode (multi-agent) toggle */
+.deepmode {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.deeptoggle {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+.deeptoggle.on {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+  background: rgba(232, 199, 122, 0.1);
+}
+.deepmode-note {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  color: var(--muted-2);
+}
+
+/* dispatched-agents plan */
+.plan {
+  margin-top: 1.6rem;
+}
+.plan h4 {
+  color: var(--gold);
+}
+.plan ol {
+  margin: 0;
+  padding-left: 1.3rem;
+}
+.plan li {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+  padding: 0.25rem 0;
+}
+
 .results {
   margin-top: 1.6rem;
   display: grid;

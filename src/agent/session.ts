@@ -1,6 +1,7 @@
 import type { VeniceClient } from "../venice/client";
 import { resolveDefaults } from "../venice/models";
 import { runInvestigation } from "./orchestrator";
+import { runSupervised } from "./supervisor";
 import { buildDossier, type Dossier } from "./report";
 import { buildBriefing } from "./briefing";
 import { runVaultSynthesis } from "./vault";
@@ -12,6 +13,7 @@ export type ResearchEvent =
   | { type: "receipt"; receipt: PrivacyReceipt }
   | { type: "answer"; text: string }
   | { type: "dossier"; dossier: Dossier; stoppedReason: string }
+  | { type: "plan"; subtasks: string[] }
   | { type: "vault"; text: string }
   | { type: "cover"; dataUrl: string }
   | { type: "audio"; dataUrl: string };
@@ -21,6 +23,10 @@ export interface SessionArgs {
   question: string;
   emit: (event: ResearchEvent) => void;
   now?: () => string;
+  /** When true, a supervisor decomposes the question and runs parallel specialist agents. */
+  withMultiAgent?: boolean;
+  /** Max specialist agents in multi-agent mode (default 3). */
+  maxAgents?: number;
   /** When true, run an adversarial skeptic pass that judges each finding before the dossier. */
   withVerify?: boolean;
   /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
@@ -34,8 +40,20 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
   const models = await a.client.listModels("text");
   const defaults = resolveDefaults(models);
 
-  a.emit({ type: "status", message: "Investigating…" });
-  const run = await runInvestigation({ client: a.client, models, question: a.question, now: a.now });
+  a.emit({
+    type: "status",
+    message: a.withMultiAgent ? "Dispatching specialist agents…" : "Investigating…",
+  });
+  const run = a.withMultiAgent
+    ? await runSupervised({
+        client: a.client,
+        models,
+        question: a.question,
+        now: a.now,
+        maxAgents: a.maxAgents,
+        onPlan: (subtasks) => a.emit({ type: "plan", subtasks }),
+      })
+    : await runInvestigation({ client: a.client, models, question: a.question, now: a.now });
   for (const receipt of run.receipts) a.emit({ type: "receipt", receipt });
   a.emit({ type: "answer", text: run.finalAnswer });
 
