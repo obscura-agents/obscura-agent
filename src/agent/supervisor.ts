@@ -102,6 +102,7 @@ export async function runSupervised(args: SupervisedArgs): Promise<RunResult> {
         minUsd: args.minUsd,
         now: args.now,
         modelId: args.modelId,
+        personaPrompt: args.personaPrompt,
         onActivity: (action, detail) => args.onActivity?.(action, `[${i + 1}] ${detail ?? ""}`.trim()),
         onReceipt: args.onReceipt,
       }),

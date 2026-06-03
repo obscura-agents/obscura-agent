@@ -4,6 +4,7 @@ import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
 import { dossierToMarkdown } from "../../agent/exportDossier";
 import { DEMO_EVENTS, DEMO_QUESTION } from "./demoScript";
+import { PERSONAS, type PersonaKey } from "../../agent/personas";
 import type { PrivacyReceipt } from "../../privacy/receipt";
 import type { Dossier } from "../../agent/report";
 
@@ -33,6 +34,7 @@ export function Console() {
   const [activity, setActivity] = useState<{ action: string; detail?: string }[]>([]);
   const [deep, setDeep] = useState(false);
   const [model, setModel] = useState<"default" | "uncensored">("default");
+  const [persona, setPersona] = useState<PersonaKey>("investigator");
   const [running, setRunning] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
@@ -118,7 +120,7 @@ export function Console() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, deep, model, ...byok }),
+        body: JSON.stringify({ question: q, deep, model, persona, ...byok }),
       });
 
       if (!res.ok || !res.body) {
@@ -244,6 +246,17 @@ export function Console() {
             </button>
           </div>
           <span className="deepmode-note">uncensored = won&apos;t refuse legitimate-but-hard topics</span>
+        </div>
+
+        <div className="deepmode">
+          <div className="keymode-toggle">
+            {(Object.keys(PERSONAS) as PersonaKey[]).map((k) => (
+              <button key={k} type="button" className={persona === k ? "on" : ""} onClick={() => setPersona(k)}>
+                {PERSONAS[k].label}
+              </button>
+            ))}
+          </div>
+          <span className="deepmode-note">persona shapes the investigator&apos;s style</span>
         </div>
 
         <p className={`status${isError ? " err" : ""}`}>

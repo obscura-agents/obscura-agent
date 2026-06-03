@@ -6,6 +6,7 @@ import { buildDossier, type Dossier } from "./report";
 import { buildBriefing } from "./briefing";
 import { runVaultSynthesis } from "./vault";
 import { verifyFindings } from "./verify";
+import { personaPrompt } from "./personas";
 import type { PrivacyReceipt } from "../privacy/receipt";
 
 export type ResearchEvent =
@@ -30,6 +31,8 @@ export interface SessionArgs {
   maxAgents?: number;
   /** Recon model preference: "default" (balanced) or "uncensored". */
   modelPref?: "default" | "uncensored";
+  /** Investigator persona key (see agent/personas.ts). */
+  persona?: string;
   /** When true, run an adversarial skeptic pass that judges each finding before the dossier. */
   withVerify?: boolean;
   /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
@@ -48,6 +51,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     message: a.withMultiAgent ? "Dispatching specialist agents…" : "Investigating…",
   });
   const reconModelId = a.modelPref === "uncensored" ? defaults.uncensored : undefined;
+  const personaStyle = personaPrompt(a.persona);
   const onActivity = (action: string, detail?: string) => a.emit({ type: "activity", action, detail });
   const onReceipt = (receipt: PrivacyReceipt) => a.emit({ type: "receipt", receipt });
   const run = a.withMultiAgent
@@ -58,6 +62,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         now: a.now,
         maxAgents: a.maxAgents,
         modelId: reconModelId,
+        personaPrompt: personaStyle,
         onActivity,
         onReceipt,
         onPlan: (subtasks) => a.emit({ type: "plan", subtasks }),
@@ -68,6 +73,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         question: a.question,
         now: a.now,
         modelId: reconModelId,
+        personaPrompt: personaStyle,
         onActivity,
         onReceipt,
       });

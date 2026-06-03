@@ -20,6 +20,8 @@ export interface RunArgs {
   onActivity?: (action: string, detail?: string) => void;
   /** Live: called as each privacy receipt is produced (instead of only in the returned aggregate). */
   onReceipt?: (receipt: PrivacyReceipt) => void;
+  /** Optional persona style appended to the system prompt. */
+  personaPrompt?: string;
 }
 
 export type StoppedReason = "completed" | "max_steps" | "spend_cap";
@@ -49,7 +51,10 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
   const citations: WebSearchCitation[] = [];
   const receipts: PrivacyReceipt[] = [];
   const messages: ChatMessage[] = [
-    { role: "system", content: SYSTEM_PROMPT },
+    {
+      role: "system",
+      content: args.personaPrompt ? `${SYSTEM_PROMPT} Adopt this persona: ${args.personaPrompt}` : SYSTEM_PROMPT,
+    },
     { role: "user", content: args.question },
   ];
 
