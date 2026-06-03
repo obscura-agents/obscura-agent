@@ -1,4 +1,4 @@
-import { VeniceClient } from "../../../venice/client";
+import { createVeniceClient } from "../../../venice/factory";
 import { runResearchSession, type ResearchEvent } from "../../../agent/session";
 
 // Node.js is the default runtime in Next.js 16; no explicit `runtime` export needed.
@@ -8,10 +8,12 @@ export async function POST(req: Request): Promise<Response> {
   const { question } = (await req.json()) as { question?: string };
   if (!question) return new Response("Missing 'question'", { status: 400 });
 
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) return new Response("Server missing VENICE_API_KEY", { status: 500 });
-
-  const client = new VeniceClient({ apiKey, baseUrl: process.env.VENICE_BASE_URL });
+  let client;
+  try {
+    client = createVeniceClient(process.env as Record<string, string>);
+  } catch (e) {
+    return new Response((e as Error).message, { status: 500 });
+  }
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
