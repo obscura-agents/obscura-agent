@@ -500,6 +500,16 @@ h3 {
   gap: 1.5rem;
 }
 
+/* vault brief (E2EE) */
+.vault-brief {
+  margin-top: 1.6rem;
+  border-color: rgba(185, 163, 255, 0.3);
+  background: linear-gradient(180deg, rgba(185, 163, 255, 0.04), transparent);
+}
+.vault-brief h4 {
+  color: var(--violet);
+}
+
 /* multimodal briefing */
 .briefing {
   margin-top: 1.6rem;

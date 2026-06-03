@@ -19,6 +19,7 @@ export function Console() {
   const [dossier, setDossier] = useState<Dossier | null>(null);
   const [cover, setCover] = useState<string>("");
   const [audio, setAudio] = useState<string>("");
+  const [vaultText, setVaultText] = useState<string>("");
   const [running, setRunning] = useState(false);
 
   // BYOK — bring your own Venice key (stored only in this browser).
@@ -45,6 +46,7 @@ export function Console() {
     setDossier(null);
     setCover("");
     setAudio("");
+    setVaultText("");
     setIsError(false);
     setRunning(true);
     setStatus("Opening the chamber");
@@ -89,6 +91,7 @@ export function Console() {
             setDossier(ev.dossier as Dossier);
             setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
           }
+          if (ev.type === "vault") setVaultText(String(ev.text));
           if (ev.type === "cover") setCover(String(ev.dataUrl));
           if (ev.type === "audio") setAudio(String(ev.dataUrl));
         }
@@ -168,6 +171,13 @@ export function Console() {
                 {s}
               </button>
             ))}
+          </div>
+        )}
+
+        {vaultText && (
+          <div className="panel dossier vault-brief">
+            <h4>🔒 Vault brief — sealed (E2EE)</h4>
+            <p className="summary">{vaultText}</p>
           </div>
         )}
 

@@ -3,6 +3,7 @@ import { resolveDefaults } from "../venice/models";
 import { runInvestigation } from "./orchestrator";
 import { buildDossier, type Dossier } from "./report";
 import { buildBriefing } from "./briefing";
+import { runVaultSynthesis } from "./vault";
 import type { PrivacyReceipt } from "../privacy/receipt";
 
 export type ResearchEvent =
@@ -10,6 +11,7 @@ export type ResearchEvent =
   | { type: "receipt"; receipt: PrivacyReceipt }
   | { type: "answer"; text: string }
   | { type: "dossier"; dossier: Dossier; stoppedReason: string }
+  | { type: "vault"; text: string }
   | { type: "cover"; dataUrl: string }
   | { type: "audio"; dataUrl: string };
 
@@ -18,6 +20,8 @@ export interface SessionArgs {
   question: string;
   emit: (event: ResearchEvent) => void;
   now?: () => string;
+  /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
+  withVault?: boolean;
   /** When true, also generate a multimodal briefing (cover image + TTS audio) after the dossier. */
   withBriefing?: boolean;
 }
@@ -41,6 +45,20 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     citations: run.citations,
   });
   a.emit({ type: "dossier", dossier, stoppedReason: run.stoppedReason });
+
+  if (a.withVault) {
+    const vaultModel = defaults.vault ? models.find((m) => m.id === defaults.vault) : undefined;
+    if (vaultModel) {
+      a.emit({ type: "status", message: "Sealing a confidential brief (E2EE)…" });
+      try {
+        const vault = await runVaultSynthesis(a.client, vaultModel, dossier, a.now);
+        a.emit({ type: "receipt", receipt: vault.receipt });
+        if (vault.text) a.emit({ type: "vault", text: vault.text });
+      } catch {
+        // Vault is an enhancement — never fail the investigation over it.
+      }
+    }
+  }
 
   if (a.withBriefing) {
     a.emit({ type: "status", message: "Composing a briefing…" });
