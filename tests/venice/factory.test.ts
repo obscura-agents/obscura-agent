@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("venice-x402-client", () => ({
   createAuthFetch: vi.fn(() => (() => {}) as unknown as typeof fetch),
@@ -8,6 +8,7 @@ import { createVeniceClient } from "../../src/venice/factory";
 import { createAuthFetch } from "venice-x402-client";
 
 describe("createVeniceClient", () => {
+  beforeEach(() => vi.clearAllMocks());
   it("apikey mode builds a bearer client without touching x402", () => {
     const c = createVeniceClient({ OBSCURA_PAYMENT_MODE: "apikey", VENICE_API_KEY: "k" });
     expect(c).toBeTruthy();
@@ -27,5 +28,12 @@ describe("createVeniceClient", () => {
   it("throws when the required secret is missing", () => {
     expect(() => createVeniceClient({ OBSCURA_PAYMENT_MODE: "x402" })).toThrow(/WALLET/);
     expect(() => createVeniceClient({ OBSCURA_PAYMENT_MODE: "apikey" })).toThrow(/VENICE_API_KEY/);
+  });
+
+  it("uses a user-provided key (BYOK) regardless of env/mode, without needing platform secrets", () => {
+    // no VENICE_API_KEY in env, but a BYOK key is given -> should not throw
+    const c = createVeniceClient({ OBSCURA_PAYMENT_MODE: "apikey" }, "user-byok-key");
+    expect(c).toBeTruthy();
+    expect(createAuthFetch).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
 import type { PrivacyReceipt } from "../../privacy/receipt";
@@ -21,6 +21,24 @@ export function Console() {
   const [audio, setAudio] = useState<string>("");
   const [running, setRunning] = useState(false);
 
+  // BYOK — bring your own Venice key (stored only in this browser).
+  const [useOwnKey, setUseOwnKey] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("obscura_venice_key");
+    if (saved) {
+      setApiKey(saved);
+      setUseOwnKey(true);
+    }
+  }, []);
+
+  function updateKey(v: string) {
+    setApiKey(v);
+    if (v.trim()) localStorage.setItem("obscura_venice_key", v.trim());
+    else localStorage.removeItem("obscura_venice_key");
+  }
+
   async function run(q: string) {
     if (!q.trim() || running) return;
     setReceipts([]);
@@ -32,10 +50,11 @@ export function Console() {
     setStatus("Opening the chamber");
 
     try {
+      const byok = useOwnKey && apiKey.trim() ? { veniceApiKey: apiKey.trim() } : {};
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q }),
+        body: JSON.stringify({ question: q, ...byok }),
       });
 
       if (!res.ok || !res.body) {
@@ -110,6 +129,32 @@ export function Console() {
             {running ? "Investigating" : "Investigate"}
           </button>
         </form>
+
+        <div className="keymode">
+          <div className="keymode-toggle">
+            <button type="button" className={!useOwnKey ? "on" : ""} onClick={() => setUseOwnKey(false)}>
+              Platform
+            </button>
+            <button type="button" className={useOwnKey ? "on" : ""} onClick={() => setUseOwnKey(true)}>
+              Your Venice key
+            </button>
+          </div>
+          {useOwnKey && (
+            <div className="keymode-input">
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => updateKey(e.target.value)}
+                placeholder="your Venice API key"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <span className="keymode-note">
+                Stored only in your browser · sent only with your request · never logged.
+              </span>
+            </div>
+          )}
+        </div>
 
         <p className={`status${isError ? " err" : ""}`}>
           {status}

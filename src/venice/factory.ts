@@ -14,7 +14,13 @@ export interface ClientEnv {
  * - "apikey" (default): bearer key auth.
  * - "x402": wallet-signed fetch (self-funding via Base USDC), no API key.
  */
-export function createVeniceClient(env: ClientEnv): VeniceClient {
+export function createVeniceClient(env: ClientEnv, userKey?: string): VeniceClient {
+  // BYOK: a user-provided key wins over platform secrets — lets the app run
+  // free-to-host with each user funding their own Venice access.
+  if (userKey && userKey.trim()) {
+    return new VeniceClient({ apiKey: userKey.trim(), baseUrl: env.VENICE_BASE_URL });
+  }
+
   const mode = env.OBSCURA_PAYMENT_MODE ?? "apikey";
 
   if (mode === "x402") {

@@ -5,12 +5,16 @@ import { runResearchSession, type ResearchEvent } from "../../../agent/session";
 // Route Handlers are not cached by default, which is what we want for a live stream.
 
 export async function POST(req: Request): Promise<Response> {
-  const { question } = (await req.json()) as { question?: string };
+  const { question, veniceApiKey } = (await req.json()) as {
+    question?: string;
+    veniceApiKey?: string;
+  };
   if (!question) return new Response("Missing 'question'", { status: 400 });
 
   let client;
   try {
-    client = createVeniceClient(process.env as Record<string, string>);
+    // BYOK: a user-supplied key (sent per request, never stored) overrides platform config.
+    client = createVeniceClient(process.env as Record<string, string>, veniceApiKey);
   } catch (e) {
     return new Response((e as Error).message, { status: 500 });
   }

@@ -44,12 +44,15 @@ API credit).
 
 ## Payment modes
 
-Set `OBSCURA_PAYMENT_MODE`:
+Set `OBSCURA_PAYMENT_MODE` (server), or let users bring their own:
 
 - **`apikey`** (default) — authenticate with `VENICE_API_KEY`.
 - **`x402`** — *self-funding*: the agent pays per request in USDC on Base from a wallet
   (`WALLET_PRIVATE_KEY`), no API key. Powered by `venice-x402-client` (requests are signed by the
   wallet via an injected fetch, so the full tool-using pipeline works unchanged).
+- **BYOK** — users can paste their own Venice key in the console; it's kept only in their browser
+  and sent per request (never stored or logged), overriding platform config. This lets the app be
+  **free to host** — each user funds their own Venice access.
 
 ## MCP server & Venice Skill
 

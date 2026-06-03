@@ -439,6 +439,60 @@ h3 {
   border-color: var(--gold-dim);
 }
 
+/* BYOK key mode */
+.keymode {
+  margin-top: 1rem;
+}
+.keymode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.keymode-toggle button {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0.4rem 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+.keymode-toggle button.on {
+  background: rgba(232, 199, 122, 0.14);
+  color: var(--gold);
+}
+.keymode-input {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 460px;
+}
+.keymode-input input {
+  background: #15130d;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  outline: none;
+  transition: border-color 0.3s var(--ease);
+}
+.keymode-input input:focus {
+  border-color: var(--gold-dim);
+}
+.keymode-note {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--muted-2);
+  letter-spacing: 0.04em;
+}
+
 .results {
   margin-top: 1.6rem;
   display: grid;
