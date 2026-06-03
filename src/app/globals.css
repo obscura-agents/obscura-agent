@@ -185,10 +185,10 @@ h3 {
 
 /* ---------- brand logo (image) ---------- */
 .brand-mark {
-  width: 150px;
+  width: clamp(200px, 26vw, 300px);
   height: auto;
   display: block;
-  filter: drop-shadow(0 0 14px rgba(232, 199, 122, 0.22));
+  filter: drop-shadow(0 0 18px rgba(232, 199, 122, 0.22));
 }
 .brand-mark.spin {
   animation: spin 40s linear infinite;
