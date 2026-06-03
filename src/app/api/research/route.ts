@@ -3,6 +3,9 @@ import { runResearchSession, type ResearchEvent } from "../../../agent/session";
 
 // Node.js is the default runtime in Next.js 16; no explicit `runtime` export needed.
 // Route Handlers are not cached by default, which is what we want for a live stream.
+// Give the streaming investigation more time than the default serverless timeout.
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request): Promise<Response> {
   const { question, veniceApiKey, deep, model, persona } = (await req.json()) as {
