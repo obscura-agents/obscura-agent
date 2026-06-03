@@ -1,4 +1,4 @@
-import type { VeniceClient } from "../venice/client";
+import { messageText, type VeniceClient } from "../venice/client";
 import type { ModelSpec } from "../venice/types";
 import { buildReceipt, type PrivacyReceipt } from "../privacy/receipt";
 import type { Dossier } from "./report";
@@ -58,5 +58,5 @@ export async function runVaultSynthesis(
     }
   }
 
-  return { text: res.choices[0]?.message.content ?? "", receipt };
+  return { text: messageText(res.choices[0]?.message.content), receipt };
 }

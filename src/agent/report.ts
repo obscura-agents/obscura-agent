@@ -1,4 +1,4 @@
-import type { VeniceClient } from "../venice/client";
+import { messageText, type VeniceClient } from "../venice/client";
 import type { WebSearchCitation } from "../venice/types";
 
 export type Verdict = "supported" | "refuted" | "uncertain";
@@ -70,5 +70,5 @@ export async function buildDossier(a: BuildDossierArgs): Promise<Dossier> {
     ],
     response_format: { type: "json_schema", json_schema: DOSSIER_SCHEMA as unknown as Record<string, unknown> },
   });
-  return JSON.parse(res.choices[0]?.message.content ?? "{}") as Dossier;
+  return JSON.parse(messageText(res.choices[0]?.message.content) || "{}") as Dossier;
 }

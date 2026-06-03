@@ -1,4 +1,16 @@
-import type { Balance, ChatRequest, ChatResponse, ModelSpec } from "./types";
+import type { Balance, ChatRequest, ChatResponse, ContentPart, ModelSpec } from "./types";
+
+/** Extract plain text from a message content that may be a string or content parts. */
+export function messageText(content: string | ContentPart[] | null | undefined): string {
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter((p): p is { type: "text"; text: string } => p.type === "text")
+      .map((p) => p.text)
+      .join("\n");
+  }
+  return "";
+}
 
 export interface VeniceConfig {
   /** Bearer key for apikey mode. Omit in x402/wallet mode (auth is handled by fetchImpl). */

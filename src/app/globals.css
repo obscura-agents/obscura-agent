@@ -578,6 +578,52 @@ h3 {
   cursor: not-allowed;
 }
 
+/* attachments */
+.attach-row {
+  margin-top: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.attach-btn {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+.attach-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+}
+.attach-chip {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(232, 199, 122, 0.08);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0.25rem 0.4rem 0.25rem 0.7rem;
+}
+.attach-chip button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.attach-chip button:hover {
+  color: #e08a6a;
+}
+
 /* BYOK key mode */
 .keymode {
   margin-top: 1rem;

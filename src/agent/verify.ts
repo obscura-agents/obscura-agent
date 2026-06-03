@@ -1,4 +1,4 @@
-import type { VeniceClient } from "../venice/client";
+import { messageText, type VeniceClient } from "../venice/client";
 import type { Finding, Verdict } from "./report";
 
 // Strict json_schema: every object lists all props in required + additionalProperties:false.
@@ -59,7 +59,7 @@ export async function verifyFindings(
 
   let verdicts: Array<{ verdict: Verdict; reason: string }> = [];
   try {
-    verdicts = JSON.parse(res.choices[0]?.message.content ?? "{}").verdicts ?? [];
+    verdicts = JSON.parse(messageText(res.choices[0]?.message.content) || "{}").verdicts ?? [];
   } catch {
     verdicts = [];
   }

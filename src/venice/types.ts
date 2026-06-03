@@ -1,8 +1,13 @@
 export type Role = "system" | "user" | "assistant" | "tool";
 
+export type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { file_data: string; filename?: string } };
+
 export interface ChatMessage {
   role: Role;
-  content: string | null;
+  content: string | ContentPart[] | null;
   tool_calls?: ToolCall[];
   tool_call_id?: string;
 }

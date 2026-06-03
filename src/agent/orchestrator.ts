@@ -1,5 +1,5 @@
-import type { VeniceClient } from "../venice/client";
-import type { Balance, ChatMessage, ModelSpec, WebSearchCitation } from "../venice/types";
+import { messageText, type VeniceClient } from "../venice/client";
+import type { Balance, ChatMessage, ContentPart, ModelSpec, WebSearchCitation } from "../venice/types";
 import { resolveDefaults } from "../venice/models";
 import { buildReceipt, type PrivacyReceipt } from "../privacy/receipt";
 import { TOOL_DEFS } from "../tools/registry";
@@ -22,6 +22,8 @@ export interface RunArgs {
   onReceipt?: (receipt: PrivacyReceipt) => void;
   /** Optional persona style appended to the system prompt. */
   personaPrompt?: string;
+  /** Optional attachment (a document or image, as a data URL) to investigate. */
+  attachment?: { kind: "file" | "image"; dataUrl: string; name: string };
 }
 
 export type StoppedReason = "completed" | "max_steps" | "spend_cap";
@@ -50,12 +52,21 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
   const store = new VectorStore();
   const citations: WebSearchCitation[] = [];
   const receipts: PrivacyReceipt[] = [];
+  let userContent: string | ContentPart[] = args.question;
+  if (args.attachment) {
+    const part: ContentPart =
+      args.attachment.kind === "image"
+        ? { type: "image_url", image_url: { url: args.attachment.dataUrl } }
+        : { type: "file", file: { file_data: args.attachment.dataUrl, filename: args.attachment.name } };
+    userContent = [{ type: "text", text: args.question }, part];
+  }
+
   const messages: ChatMessage[] = [
     {
       role: "system",
       content: args.personaPrompt ? `${SYSTEM_PROMPT} Adopt this persona: ${args.personaPrompt}` : SYSTEM_PROMPT,
     },
-    { role: "user", content: args.question },
+    { role: "user", content: userContent },
   ];
 
   let stoppedReason: StoppedReason = "max_steps";
@@ -92,7 +103,7 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
       args.onReceipt?.(answerReceipt);
       stoppedReason = "completed";
       return {
-        finalAnswer: choice.message.content ?? "",
+        finalAnswer: messageText(choice.message.content),
         citations,
         receipts,
         transcript: messages,

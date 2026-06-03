@@ -1,4 +1,4 @@
-import type { VeniceClient } from "../venice/client";
+import { messageText, type VeniceClient } from "../venice/client";
 import type { WebSearchCitation } from "../venice/types";
 
 export interface WebSearchResult {
@@ -13,7 +13,7 @@ export async function webSearch(client: VeniceClient, model: string, query: stri
     venice_parameters: { enable_web_search: "on", enable_web_citations: true },
   });
   return {
-    summary: res.choices[0]?.message.content ?? "",
+    summary: messageText(res.choices[0]?.message.content),
     citations: res.venice_parameters?.web_search_citations ?? [],
   };
 }

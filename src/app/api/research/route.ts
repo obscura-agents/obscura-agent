@@ -8,12 +8,13 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request): Promise<Response> {
-  const { question, veniceApiKey, deep, model, persona } = (await req.json()) as {
+  const { question, veniceApiKey, deep, model, persona, attachment } = (await req.json()) as {
     question?: string;
     veniceApiKey?: string;
     deep?: boolean;
     model?: "default" | "uncensored";
     persona?: string;
+    attachment?: { kind: "file" | "image"; dataUrl: string; name: string };
   };
   if (!question) return new Response("Missing 'question'", { status: 400 });
 
@@ -37,6 +38,7 @@ export async function POST(req: Request): Promise<Response> {
           emit: send,
           modelPref: model,
           persona,
+          attachment,
           withMultiAgent: !!deep,
           withVerify: true,
           withVault: true,

@@ -36,7 +36,28 @@ export function Console() {
   const [deep, setDeep] = useState(false);
   const [model, setModel] = useState<"default" | "uncensored">("default");
   const [persona, setPersona] = useState<PersonaKey>("investigator");
+  const [attachment, setAttachment] = useState<{ kind: "file" | "image"; dataUrl: string; name: string } | null>(null);
   const [running, setRunning] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 25 * 1024 * 1024) {
+      setIsError(true);
+      setStatus("Attachment too large (max 25MB).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () =>
+      setAttachment({
+        kind: f.type.startsWith("image/") ? "image" : "file",
+        dataUrl: String(reader.result),
+        name: f.name,
+      });
+    reader.readAsDataURL(f);
+    e.target.value = "";
+  }
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<{ q: string; dossier: Dossier; vault?: string; ts: number }[]>([]);
   const feedRef = useRef<HTMLDivElement>(null);
@@ -172,7 +193,7 @@ export function Console() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, deep, model, persona, ...byok }),
+        body: JSON.stringify({ question: q, deep, model, persona, ...(attachment ? { attachment } : {}), ...byok }),
       });
 
       if (!res.ok || !res.body) {
@@ -244,6 +265,27 @@ export function Console() {
             {running ? "Investigating" : "Investigate"}
           </button>
         </form>
+
+        <div className="attach-row">
+          <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
+            📎 Attach document / image
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.pptx,.xlsx,.txt,image/*"
+            onChange={onPickFile}
+            hidden
+          />
+          {attachment && (
+            <span className="attach-chip">
+              {attachment.kind === "image" ? "🖼️" : "📄"} {attachment.name}
+              <button type="button" onClick={() => setAttachment(null)} aria-label="remove attachment">
+                ✕
+              </button>
+            </span>
+          )}
+        </div>
 
         <button type="button" className="demo-cta" onClick={runDemo} disabled={running}>
           ▶ Watch a live demo — no key needed

@@ -1,4 +1,4 @@
-import type { VeniceClient } from "../venice/client";
+import { messageText, type VeniceClient } from "../venice/client";
 import type { ModelSpec, WebSearchCitation } from "../venice/types";
 import { resolveDefaults } from "../venice/models";
 import { runInvestigation, type RunArgs, type RunResult } from "./orchestrator";
@@ -40,7 +40,7 @@ export async function planSubtasks(
 
   let subtasks: string[] = [];
   try {
-    subtasks = JSON.parse(res.choices[0]?.message.content ?? "{}").subtasks ?? [];
+    subtasks = JSON.parse(messageText(res.choices[0]?.message.content) || "{}").subtasks ?? [];
   } catch {
     subtasks = [];
   }
@@ -103,6 +103,7 @@ export async function runSupervised(args: SupervisedArgs): Promise<RunResult> {
         now: args.now,
         modelId: args.modelId,
         personaPrompt: args.personaPrompt,
+        attachment: args.attachment,
         onActivity: (action, detail) => args.onActivity?.(action, `[${i + 1}] ${detail ?? ""}`.trim()),
         onReceipt: args.onReceipt,
       }),

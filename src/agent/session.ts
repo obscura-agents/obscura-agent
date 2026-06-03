@@ -33,6 +33,8 @@ export interface SessionArgs {
   modelPref?: "default" | "uncensored";
   /** Investigator persona key (see agent/personas.ts). */
   persona?: string;
+  /** Optional document/image attachment to investigate. */
+  attachment?: { kind: "file" | "image"; dataUrl: string; name: string };
   /** When true, run an adversarial skeptic pass that judges each finding before the dossier. */
   withVerify?: boolean;
   /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
@@ -50,7 +52,12 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     type: "status",
     message: a.withMultiAgent ? "Dispatching specialist agents…" : "Investigating…",
   });
-  const reconModelId = a.modelPref === "uncensored" ? defaults.uncensored : undefined;
+  const reconModelId =
+    a.modelPref === "uncensored"
+      ? defaults.uncensored
+      : a.attachment?.kind === "image"
+        ? defaults.vision
+        : undefined;
   const personaStyle = personaPrompt(a.persona);
   const onActivity = (action: string, detail?: string) => a.emit({ type: "activity", action, detail });
   const onReceipt = (receipt: PrivacyReceipt) => a.emit({ type: "receipt", receipt });
@@ -63,6 +70,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         maxAgents: a.maxAgents,
         modelId: reconModelId,
         personaPrompt: personaStyle,
+        attachment: a.attachment,
         onActivity,
         onReceipt,
         onPlan: (subtasks) => a.emit({ type: "plan", subtasks }),
@@ -74,6 +82,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         now: a.now,
         modelId: reconModelId,
         personaPrompt: personaStyle,
+        attachment: a.attachment,
         onActivity,
         onReceipt,
       });
