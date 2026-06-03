@@ -1,9 +1,14 @@
 import type { VeniceClient } from "../venice/client";
 import type { WebSearchCitation } from "../venice/types";
 
+export type Verdict = "supported" | "refuted" | "uncertain";
+
 export interface Finding {
   claim: string;
   source_urls: string[];
+  /** Set by the adversarial verification pass (see agent/verify.ts). */
+  verdict?: Verdict;
+  reason?: string;
 }
 
 export interface Dossier {

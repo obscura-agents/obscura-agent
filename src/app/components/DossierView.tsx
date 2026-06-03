@@ -17,6 +17,11 @@ export function DossierView({ dossier, running }: { dossier: Dossier | null; run
               <ul>
                 {dossier.findings.map((f, i) => (
                   <li className="finding" key={i}>
+                    {f.verdict && (
+                      <span className={`verdict ${f.verdict}`} title={f.reason}>
+                        {f.verdict === "supported" ? "✓" : f.verdict === "refuted" ? "✗" : "?"} {f.verdict}
+                      </span>
+                    )}{" "}
                     {f.claim}
                     {f.source_urls.length > 0 && (
                       <div className="cites">

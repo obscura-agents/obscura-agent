@@ -4,6 +4,7 @@ import { runInvestigation } from "./orchestrator";
 import { buildDossier, type Dossier } from "./report";
 import { buildBriefing } from "./briefing";
 import { runVaultSynthesis } from "./vault";
+import { verifyFindings } from "./verify";
 import type { PrivacyReceipt } from "../privacy/receipt";
 
 export type ResearchEvent =
@@ -20,6 +21,8 @@ export interface SessionArgs {
   question: string;
   emit: (event: ResearchEvent) => void;
   now?: () => string;
+  /** When true, run an adversarial skeptic pass that judges each finding before the dossier. */
+  withVerify?: boolean;
   /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
   withVault?: boolean;
   /** When true, also generate a multimodal briefing (cover image + TTS audio) after the dossier. */
@@ -44,6 +47,16 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     finalAnswer: run.finalAnswer,
     citations: run.citations,
   });
+
+  if (a.withVerify && dossier.findings.length > 0) {
+    a.emit({ type: "status", message: "Adversarially verifying findings…" });
+    try {
+      dossier.findings = await verifyFindings(a.client, defaults.tools, dossier.findings);
+    } catch {
+      // Keep the unverified findings if the skeptic pass fails.
+    }
+  }
+
   a.emit({ type: "dossier", dossier, stoppedReason: run.stoppedReason });
 
   if (a.withVault) {
