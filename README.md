@@ -39,12 +39,34 @@ API credit).
 - `npm run dev` — start the dev server
 - `npm run build` — production build
 - `npm test` — run the unit test suite (Vitest, fully mocked — no API key required)
+- `npm run typecheck` — `tsc --noEmit`
+- `npm run mcp` — run the MCP server over stdio
+
+## Payment modes
+
+Set `OBSCURA_PAYMENT_MODE`:
+
+- **`apikey`** (default) — authenticate with `VENICE_API_KEY`.
+- **`x402`** — *self-funding*: the agent pays per request in USDC on Base from a wallet
+  (`WALLET_PRIVATE_KEY`), no API key. Powered by `venice-x402-client` (requests are signed by the
+  wallet via an injected fetch, so the full tool-using pipeline works unchanged).
+
+## MCP server & Venice Skill
+
+- **MCP:** `npm run mcp` starts a stdio MCP server exposing a `research` tool — drop it into
+  Cursor / Claude / any MCP client to run private research from your editor.
+- **Skill:** `skills/obscura-agent/SKILL.md` packages the agent as a Venice Agent Skill so other
+  agent runtimes can discover and use it. This is the first step toward the **Obscura Agents**
+  platform.
 
 ## Architecture
 
 | Layer | Path |
 |---|---|
 | Venice client (chat, embeddings, models, balance) | `src/venice/client.ts` |
+| Payment-mode factory (apikey \| x402) | `src/venice/factory.ts` |
+| MCP server + research tool | `src/mcp/server.ts`, `src/mcp/researchTool.ts` |
+| Venice Agent Skill | `skills/obscura-agent/SKILL.md` |
 | Model resolver + Privacy Receipts | `src/venice/models.ts`, `src/privacy/receipt.ts` |
 | RAG store + tools (web_search, fetch_url) | `src/rag/store.ts`, `src/tools/` |
 | Orchestrator (planner→executor loop, spend cap) | `src/agent/orchestrator.ts` |
