@@ -21,7 +21,7 @@ export async function POST(req: Request): Promise<Response> {
       const send = (event: ResearchEvent) =>
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
       try {
-        await runResearchSession({ client, question, emit: send });
+        await runResearchSession({ client, question, emit: send, withBriefing: true });
       } catch (err) {
         send({ type: "status", message: `Error: ${(err as Error).message}` });
       } finally {

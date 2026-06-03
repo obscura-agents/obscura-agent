@@ -17,12 +17,16 @@ export function Console() {
   const [isError, setIsError] = useState(false);
   const [receipts, setReceipts] = useState<PrivacyReceipt[]>([]);
   const [dossier, setDossier] = useState<Dossier | null>(null);
+  const [cover, setCover] = useState<string>("");
+  const [audio, setAudio] = useState<string>("");
   const [running, setRunning] = useState(false);
 
   async function run(q: string) {
     if (!q.trim() || running) return;
     setReceipts([]);
     setDossier(null);
+    setCover("");
+    setAudio("");
     setIsError(false);
     setRunning(true);
     setStatus("Opening the chamber");
@@ -66,6 +70,8 @@ export function Console() {
             setDossier(ev.dossier as Dossier);
             setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
           }
+          if (ev.type === "cover") setCover(String(ev.dataUrl));
+          if (ev.type === "audio") setAudio(String(ev.dataUrl));
         }
       }
     } catch (e) {
@@ -117,6 +123,23 @@ export function Console() {
                 {s}
               </button>
             ))}
+          </div>
+        )}
+
+        {(cover || audio) && (
+          <div className="briefing">
+            {cover && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="briefing-cover" src={cover} alt="Dossier cover" />
+            )}
+            <div className="briefing-audio">
+              <span className="briefing-label">Audio briefing</span>
+              {audio ? (
+                <audio controls src={audio} />
+              ) : (
+                <span className="empty">generating…</span>
+              )}
+            </div>
           </div>
         )}
 

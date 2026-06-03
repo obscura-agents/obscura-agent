@@ -65,6 +65,48 @@ export class VeniceClient {
     return out.data;
   }
 
+  private async postBinary(path: string, body: unknown): Promise<ArrayBuffer> {
+    const res = await this.fetchImpl(`${this.baseUrl}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...this.authHeaders() },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Venice ${path} failed: ${res.status} ${text}`);
+    }
+    return res.arrayBuffer();
+  }
+
+  /** Native Venice text-to-image. Returns the first image as a base64 string. */
+  async generateImage(
+    prompt: string,
+    opts?: {
+      model?: string;
+      negative_prompt?: string;
+      width?: number;
+      height?: number;
+      aspect_ratio?: string;
+      format?: string;
+    },
+  ): Promise<string> {
+    const out = await this.post<{ images: string[] }>("/image/generate", {
+      model: opts?.model ?? "venice-sd35",
+      prompt,
+      ...opts,
+    });
+    return out.images?.[0] ?? "";
+  }
+
+  /** Venice text-to-speech. Returns raw audio bytes (mp3 by default). */
+  async speech(input: string, opts?: { model?: string; voice?: string }): Promise<ArrayBuffer> {
+    return this.postBinary("/audio/speech", {
+      model: opts?.model ?? "tts-kokoro",
+      voice: opts?.voice ?? "af_sky",
+      input,
+    });
+  }
+
   async getBalance(): Promise<Balance> {
     const out = await this.get<{ data: { accessPermitted: boolean; balances: { USD: number; DIEM: number } } }>(
       "/api_keys/rate_limits",

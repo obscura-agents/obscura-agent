@@ -83,6 +83,43 @@ describe("VeniceClient.embed", () => {
   });
 });
 
+describe("VeniceClient.generateImage", () => {
+  it("posts a prompt to /image/generate and returns the first base64 image", async () => {
+    const fetchMock = mockFetchOnce({ id: "gen-1", images: ["BASE64DATA"], timing: { total: 10 } });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new VeniceClient({ apiKey: "k" });
+    const img = await client.generateImage("a dark aperture", { aspect_ratio: "16:9" });
+    expect(img).toBe("BASE64DATA");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.venice.ai/api/v1/image/generate");
+    const body = JSON.parse((init as any).body);
+    expect(body.model).toBe("venice-sd35");
+    expect(body.prompt).toBe("a dark aperture");
+    expect(body.aspect_ratio).toBe("16:9");
+  });
+});
+
+describe("VeniceClient.speech", () => {
+  it("posts text to /audio/speech and returns audio bytes", async () => {
+    const buf = new ArrayBuffer(8);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      arrayBuffer: async () => buf,
+      text: async () => "",
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new VeniceClient({ apiKey: "k" });
+    const out = await client.speech("hello");
+    expect(out).toBe(buf);
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as any).body);
+    expect(body.model).toBe("tts-kokoro");
+    expect(body.voice).toBe("af_sky");
+    expect(body.input).toBe("hello");
+  });
+});
+
 describe("VeniceClient.getBalance", () => {
   it("reads balances from /api_keys/rate_limits", async () => {
     vi.stubGlobal(

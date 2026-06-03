@@ -445,6 +445,42 @@ h3 {
   grid-template-columns: 1fr 1.2fr;
   gap: 1.5rem;
 }
+
+/* multimodal briefing */
+.briefing {
+  margin-top: 1.6rem;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(232, 199, 122, 0.03), transparent);
+  animation: reveal-up 0.6s var(--ease) both;
+}
+.briefing-cover {
+  width: 100%;
+  display: block;
+  border-radius: 2px;
+  border: 1px solid var(--line-soft);
+}
+.briefing-audio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.briefing-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+.briefing-audio audio {
+  width: 100%;
+  filter: sepia(0.3) saturate(0.7) hue-rotate(-10deg);
+}
 .panel {
   border: 1px solid var(--line-soft);
   border-radius: 2px;
@@ -622,6 +658,7 @@ h3 {
   .steps { grid-template-columns: repeat(2, 1fr); }
   .features { grid-template-columns: 1fr; }
   .results { grid-template-columns: 1fr; }
+  .briefing { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
   .steps { grid-template-columns: 1fr; }
