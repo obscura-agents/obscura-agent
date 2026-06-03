@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
 import { dossierToMarkdown } from "../../agent/exportDossier";
+import { DEMO_EVENTS, DEMO_QUESTION } from "./demoScript";
 import type { PrivacyReceipt } from "../../privacy/receipt";
 import type { Dossier } from "../../agent/report";
 
@@ -68,8 +69,7 @@ export function Console() {
     else localStorage.removeItem("obscura_venice_key");
   }
 
-  async function run(q: string) {
-    if (!q.trim() || running) return;
+  function resetState() {
     setReceipts([]);
     setDossier(null);
     setCover("");
@@ -78,6 +78,38 @@ export function Console() {
     setPlan([]);
     setActivity([]);
     setIsError(false);
+  }
+
+  function applyEvent(ev: { type: string; [k: string]: unknown }) {
+    if (ev.type === "status") setStatus(String(ev.message));
+    if (ev.type === "receipt") setReceipts((r) => [...r, ev.receipt as PrivacyReceipt]);
+    if (ev.type === "activity")
+      setActivity((a) => [...a, { action: String(ev.action), detail: ev.detail ? String(ev.detail) : undefined }]);
+    if (ev.type === "plan") setPlan((ev.subtasks as string[]) ?? []);
+    if (ev.type === "vault") setVaultText(String(ev.text));
+    if (ev.type === "cover") setCover(String(ev.dataUrl));
+    if (ev.type === "audio") setAudio(String(ev.dataUrl));
+    if (ev.type === "dossier") {
+      setDossier(ev.dossier as Dossier);
+      setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
+    }
+  }
+
+  async function runDemo() {
+    if (running) return;
+    resetState();
+    setQuestion(DEMO_QUESTION);
+    setRunning(true);
+    for (const ev of DEMO_EVENTS) {
+      applyEvent(ev as { type: string; [k: string]: unknown });
+      await new Promise((r) => setTimeout(r, ev.type === "activity" ? 480 : 760));
+    }
+    setRunning(false);
+  }
+
+  async function run(q: string) {
+    if (!q.trim() || running) return;
+    resetState();
     setRunning(true);
     setStatus("Opening the chamber");
 
@@ -115,18 +147,7 @@ export function Console() {
           } catch {
             continue;
           }
-          if (ev.type === "status") setStatus(String(ev.message));
-          if (ev.type === "receipt") setReceipts((r) => [...r, ev.receipt as PrivacyReceipt]);
-          if (ev.type === "dossier") {
-            setDossier(ev.dossier as Dossier);
-            setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
-          }
-          if (ev.type === "activity")
-            setActivity((a) => [...a, { action: String(ev.action), detail: ev.detail ? String(ev.detail) : undefined }]);
-          if (ev.type === "plan") setPlan((ev.subtasks as string[]) ?? []);
-          if (ev.type === "vault") setVaultText(String(ev.text));
-          if (ev.type === "cover") setCover(String(ev.dataUrl));
-          if (ev.type === "audio") setAudio(String(ev.dataUrl));
+          applyEvent(ev);
         }
       }
     } catch (e) {
@@ -165,6 +186,10 @@ export function Console() {
             {running ? "Investigating" : "Investigate"}
           </button>
         </form>
+
+        <button type="button" className="demo-cta" onClick={runDemo} disabled={running}>
+          ▶ Watch a live demo — no key needed
+        </button>
 
         <div className="keymode">
           <div className="keymode-toggle">
