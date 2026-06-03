@@ -38,7 +38,55 @@ export function Console() {
   const [persona, setPersona] = useState<PersonaKey>("investigator");
   const [attachment, setAttachment] = useState<{ kind: "file" | "image"; dataUrl: string; name: string } | null>(null);
   const [running, setRunning] = useState(false);
+  const [recording, setRecording] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  async function toggleMic() {
+    if (recording) {
+      mediaRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data.size) chunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setRecording(false);
+        setStatus("Transcribing…");
+        const form = new FormData();
+        form.append("audio", new Blob(chunksRef.current, { type: "audio/webm" }), "audio.webm");
+        if (useOwnKey && apiKey.trim()) form.append("veniceApiKey", apiKey.trim());
+        try {
+          const res = await fetch("/api/transcribe", { method: "POST", body: form });
+          if (!res.ok) {
+            setIsError(true);
+            setStatus((await res.text()) || "Transcription failed");
+            return;
+          }
+          const data = await res.json();
+          setQuestion(String(data.text || ""));
+          setStatus("Transcribed — review and Investigate.");
+        } catch (err) {
+          setIsError(true);
+          setStatus((err as Error).message);
+        }
+      };
+      mr.start();
+      mediaRef.current = mr;
+      setRecording(true);
+      setIsError(false);
+      setStatus("Recording… click the mic again to stop.");
+    } catch {
+      setIsError(true);
+      setStatus("Microphone access denied.");
+    }
+  }
 
   function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -267,6 +315,9 @@ export function Console() {
         </form>
 
         <div className="attach-row">
+          <button type="button" className={`attach-btn${recording ? " rec" : ""}`} onClick={toggleMic}>
+            {recording ? "⏹ Stop" : "🎙️ Speak"}
+          </button>
           <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
             📎 Attach document / image
           </button>

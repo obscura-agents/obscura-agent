@@ -110,6 +110,24 @@ export class VeniceClient {
     return out.images?.[0] ?? "";
   }
 
+  /** Venice speech-to-text. Sends audio as multipart/form-data; returns the transcript text. */
+  async transcribe(file: Blob, model = "openai/whisper-large-v3"): Promise<string> {
+    const form = new FormData();
+    form.append("model", model);
+    form.append("file", file, "audio.webm");
+    const res = await this.fetchImpl(`${this.baseUrl}/audio/transcriptions`, {
+      method: "POST",
+      headers: { ...this.authHeaders() }, // no Content-Type — let FormData set the boundary
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Venice /audio/transcriptions failed: ${res.status} ${text}`);
+    }
+    const out = (await res.json()) as { text?: string };
+    return out.text ?? "";
+  }
+
   /** Venice text-to-speech. Returns raw audio bytes (mp3 by default). */
   async speech(input: string, opts?: { model?: string; voice?: string }): Promise<ArrayBuffer> {
     return this.postBinary("/audio/speech", {

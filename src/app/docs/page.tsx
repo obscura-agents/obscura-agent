@@ -150,6 +150,10 @@ npm run dev                         # http://localhost:3000`}</code>
             <strong>Share &amp; history</strong> — shareable dossier links (no backend) + local
             history.
           </li>
+          <li>
+            <strong>Multimodal inputs</strong> — research over an uploaded document (PDF/DOCX, via
+            Venice file input), an image (vision model), or a spoken question (Venice speech-to-text).
+          </li>
         </ul>
 
         <h2 id="funding">Funding &amp; access — no login</h2>
