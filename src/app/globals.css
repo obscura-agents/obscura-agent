@@ -138,9 +138,19 @@ a {
 }
 .nav-actions {
   display: flex;
-  gap: 0.9rem;
+  gap: 1.1rem;
   align-items: center;
   color: var(--muted);
+}
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.3s var(--ease);
+}
+.nav-link:hover {
+  color: var(--gold);
 }
 .nav-actions a {
   display: inline-flex;
