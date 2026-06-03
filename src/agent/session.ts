@@ -14,6 +14,7 @@ export type ResearchEvent =
   | { type: "answer"; text: string }
   | { type: "dossier"; dossier: Dossier; stoppedReason: string }
   | { type: "plan"; subtasks: string[] }
+  | { type: "activity"; action: string; detail?: string }
   | { type: "vault"; text: string }
   | { type: "cover"; dataUrl: string }
   | { type: "audio"; dataUrl: string };
@@ -47,6 +48,8 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     message: a.withMultiAgent ? "Dispatching specialist agents…" : "Investigating…",
   });
   const reconModelId = a.modelPref === "uncensored" ? defaults.uncensored : undefined;
+  const onActivity = (action: string, detail?: string) => a.emit({ type: "activity", action, detail });
+  const onReceipt = (receipt: PrivacyReceipt) => a.emit({ type: "receipt", receipt });
   const run = a.withMultiAgent
     ? await runSupervised({
         client: a.client,
@@ -55,6 +58,8 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         now: a.now,
         maxAgents: a.maxAgents,
         modelId: reconModelId,
+        onActivity,
+        onReceipt,
         onPlan: (subtasks) => a.emit({ type: "plan", subtasks }),
       })
     : await runInvestigation({
@@ -63,8 +68,9 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         question: a.question,
         now: a.now,
         modelId: reconModelId,
+        onActivity,
+        onReceipt,
       });
-  for (const receipt of run.receipts) a.emit({ type: "receipt", receipt });
   a.emit({ type: "answer", text: run.finalAnswer });
 
   a.emit({ type: "status", message: "Building dossier…" });

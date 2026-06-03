@@ -93,7 +93,7 @@ export async function runSupervised(args: SupervisedArgs): Promise<RunResult> {
   args.onPlan?.(subtasks);
 
   const results = await Promise.all(
-    subtasks.map((st) =>
+    subtasks.map((st, i) =>
       runWorker({
         client: args.client,
         models,
@@ -102,6 +102,8 @@ export async function runSupervised(args: SupervisedArgs): Promise<RunResult> {
         minUsd: args.minUsd,
         now: args.now,
         modelId: args.modelId,
+        onActivity: (action, detail) => args.onActivity?.(action, `[${i + 1}] ${detail ?? ""}`.trim()),
+        onReceipt: args.onReceipt,
       }),
     ),
   );

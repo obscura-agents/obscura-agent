@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
 import { dossierToMarkdown } from "../../agent/exportDossier";
@@ -12,6 +12,13 @@ const SUGGESTIONS = [
   "How does TEE attestation work?",
 ];
 
+const ACT_ICON: Record<string, string> = {
+  web_search: "🔎",
+  fetch_url: "📄",
+  recall: "🧠",
+  answer: "✒︎",
+};
+
 export function Console() {
   const [question, setQuestion] = useState("");
   const [status, setStatus] = useState("");
@@ -22,9 +29,15 @@ export function Console() {
   const [audio, setAudio] = useState<string>("");
   const [vaultText, setVaultText] = useState<string>("");
   const [plan, setPlan] = useState<string[]>([]);
+  const [activity, setActivity] = useState<{ action: string; detail?: string }[]>([]);
   const [deep, setDeep] = useState(false);
   const [model, setModel] = useState<"default" | "uncensored">("default");
   const [running, setRunning] = useState(false);
+  const feedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight });
+  }, [activity]);
 
   function downloadMd() {
     if (!dossier) return;
@@ -63,6 +76,7 @@ export function Console() {
     setAudio("");
     setVaultText("");
     setPlan([]);
+    setActivity([]);
     setIsError(false);
     setRunning(true);
     setStatus("Opening the chamber");
@@ -107,6 +121,8 @@ export function Console() {
             setDossier(ev.dossier as Dossier);
             setStatus(`Investigation complete — ${String(ev.stoppedReason)}`);
           }
+          if (ev.type === "activity")
+            setActivity((a) => [...a, { action: String(ev.action), detail: ev.detail ? String(ev.detail) : undefined }]);
           if (ev.type === "plan") setPlan((ev.subtasks as string[]) ?? []);
           if (ev.type === "vault") setVaultText(String(ev.text));
           if (ev.type === "cover") setCover(String(ev.dataUrl));
@@ -209,6 +225,18 @@ export function Console() {
           {status}
           {running && <span className="blink"> ▍</span>}
         </p>
+
+        {activity.length > 0 && (
+          <div className="feed" ref={feedRef}>
+            {activity.map((a, i) => (
+              <div className="feed-line" key={i}>
+                <span className="feed-ico">{ACT_ICON[a.action] ?? "▸"}</span>
+                <span className="feed-act">{a.action.replace(/_/g, " ")}</span>
+                {a.detail && <span className="feed-detail">{a.detail}</span>}
+              </div>
+            ))}
+          </div>
+        )}
 
         {!running && receipts.length === 0 && !dossier && (
           <div className="suggest">

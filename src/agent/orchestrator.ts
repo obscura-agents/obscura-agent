@@ -16,6 +16,10 @@ export interface RunArgs {
   now?: () => string;
   /** Override the recon model id (e.g. an uncensored model). Defaults to the trait-resolved default. */
   modelId?: string;
+  /** Live: called before each action (planning/tool) so callers can stream the agent's "thinking". */
+  onActivity?: (action: string, detail?: string) => void;
+  /** Live: called as each privacy receipt is produced (instead of only in the returned aggregate). */
+  onReceipt?: (receipt: PrivacyReceipt) => void;
 }
 
 export type StoppedReason = "completed" | "max_steps" | "spend_cap";
@@ -77,7 +81,10 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
     messages.push(choice.message);
 
     if (choice.finish_reason !== "tool_calls" || !choice.message.tool_calls?.length) {
-      receipts.push(buildReceipt({ step, mode: "recon", action: "answer", model: reconModel!, response: res, now: now() }));
+      args.onActivity?.("answer", "synthesizing the answer");
+      const answerReceipt = buildReceipt({ step, mode: "recon", action: "answer", model: reconModel!, response: res, now: now() });
+      receipts.push(answerReceipt);
+      args.onReceipt?.(answerReceipt);
       stoppedReason = "completed";
       return {
         finalAnswer: choice.message.content ?? "",
@@ -91,6 +98,7 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
     for (const call of choice.message.tool_calls) {
       const action = call.function.name;
       const params = JSON.parse(call.function.arguments) as Record<string, string>;
+      args.onActivity?.(action, params.query ?? params.url ?? "");
       let toolContent = "";
 
       if (action === "web_search") {
@@ -110,7 +118,9 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
       }
 
       messages.push({ role: "tool", tool_call_id: call.id, content: toolContent });
-      receipts.push(buildReceipt({ step, mode: "recon", action, model: reconModel!, response: res, now: now() }));
+      const toolReceipt = buildReceipt({ step, mode: "recon", action, model: reconModel!, response: res, now: now() });
+      receipts.push(toolReceipt);
+      args.onReceipt?.(toolReceipt);
     }
   }
 

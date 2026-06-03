@@ -417,6 +417,41 @@ h3 {
 .status.err {
   color: #e08a6a;
 }
+
+/* live activity feed (terminal) */
+.feed {
+  margin-top: 1rem;
+  max-height: 190px;
+  overflow-y: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  background: #0b0c10;
+  padding: 0.6rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+.feed-line {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.18rem 0;
+  animation: reveal-up 0.3s var(--ease) both;
+}
+.feed-ico {
+  width: 1.2em;
+  flex: none;
+}
+.feed-act {
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  flex: none;
+}
+.feed-detail {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .suggest {
   margin-top: 1rem;
   display: flex;
