@@ -772,6 +772,76 @@ h3 {
 .verdict.uncertain {
   color: var(--muted);
 }
+
+/* dossier header + list/graph toggle */
+.dossier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+.dossier-head h4 {
+  margin: 0;
+}
+.viewtoggle {
+  display: inline-flex;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.viewtoggle button {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+}
+.viewtoggle button.on {
+  background: rgba(232, 199, 122, 0.14);
+  color: var(--gold);
+}
+
+/* evidence graph */
+.graph-wrap {
+  margin-top: 0.6rem;
+}
+.graph {
+  display: block;
+  max-height: 360px;
+}
+.graph-edge {
+  stroke: rgba(232, 199, 122, 0.28);
+  stroke-width: 1;
+}
+.graph-num {
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.graph-srcdot {
+  fill: rgba(232, 199, 122, 0.6);
+}
+.graph-src {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.graph-legend {
+  margin: 0.8rem 0 0;
+  padding-left: 1.2rem;
+}
+.graph-legend li {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 0.2rem 0;
+}
 .dossier .cites {
   margin-top: 0.35rem;
   display: flex;
