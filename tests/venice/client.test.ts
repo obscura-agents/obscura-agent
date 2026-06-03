@@ -46,6 +46,29 @@ describe("VeniceClient.chat", () => {
       client.chat({ model: "m", messages: [{ role: "user", content: "x" }] }),
     ).rejects.toThrow(/400/);
   });
+
+  it("omits the Authorization header when no apiKey is given (wallet/x402 mode)", async () => {
+    const fetchMock = mockFetchOnce({
+      id: "x", model: "m",
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "ok" } }],
+      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+    });
+    const client = new VeniceClient({ fetchImpl: fetchMock as unknown as typeof fetch });
+    await client.chat({ model: "m", messages: [{ role: "user", content: "x" }] });
+    const init = fetchMock.mock.calls[0][1] as any;
+    expect(init.headers.Authorization).toBeUndefined();
+  });
+
+  it("uses the injected fetchImpl instead of global fetch", async () => {
+    const fetchMock = mockFetchOnce({
+      id: "x", model: "m",
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "ok" } }],
+      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+    });
+    const client = new VeniceClient({ apiKey: "k", fetchImpl: fetchMock as unknown as typeof fetch });
+    await client.chat({ model: "m", messages: [{ role: "user", content: "x" }] });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("VeniceClient.embed", () => {

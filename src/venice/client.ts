@@ -1,23 +1,32 @@
 import type { Balance, ChatRequest, ChatResponse, ModelSpec } from "./types";
 
 export interface VeniceConfig {
-  apiKey: string;
+  /** Bearer key for apikey mode. Omit in x402/wallet mode (auth is handled by fetchImpl). */
+  apiKey?: string;
   baseUrl?: string;
+  /** Inject a custom fetch (e.g. a wallet-signing fetch from venice-x402-client). Defaults to global fetch. */
+  fetchImpl?: typeof fetch;
 }
 
 export class VeniceClient {
-  private apiKey: string;
+  private apiKey?: string;
   private baseUrl: string;
+  private fetchImpl: typeof fetch;
 
   constructor(cfg: VeniceConfig) {
     this.apiKey = cfg.apiKey;
     this.baseUrl = (cfg.baseUrl ?? "https://api.venice.ai/api/v1").replace(/\/$/, "");
+    this.fetchImpl = cfg.fetchImpl ?? fetch;
+  }
+
+  private authHeaders(): Record<string, string> {
+    return this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {};
   }
 
   private async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
+    const res = await this.fetchImpl(`${this.baseUrl}${path}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...this.authHeaders() },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -28,8 +37,8 @@ export class VeniceClient {
   }
 
   private async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      headers: { Authorization: `Bearer ${this.apiKey}` },
+    const res = await this.fetchImpl(`${this.baseUrl}${path}`, {
+      headers: this.authHeaders(),
     });
     if (!res.ok) {
       const text = await res.text();
