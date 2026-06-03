@@ -48,7 +48,7 @@ export default function Home() {
 
   return (
     <main className="app">
-      <h1>GhostWire</h1>
+      <h1>Obscura Agent</h1>
       <p className="tagline">
         Private research that leaves no trace. <span className="powered">Powered by Venice</span>
       </p>

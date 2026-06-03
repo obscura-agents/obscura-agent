@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Obscura Agent
 
-## Getting Started
+**The autonomous research agent that leaves no trace.** Powered by [Venice](https://venice.ai).
 
-First, run the development server:
+Obscura Agent is a privacy-first, agentic research tool built on the Venice.ai API. Give it a
+question; it autonomously plans, searches and scrapes the web, builds a private memory, and returns
+a **sourced, cited dossier** — while proving, step by step, that nothing leaked.
+
+## Why it's different
+
+- **Genuinely agentic** — a real planner→executor loop using Venice's native function/tool calling
+  (not a single prompt or regex routing).
+- **Privacy as a visible feature** — every step emits a **Privacy Receipt** (model used, privacy
+  tier, whether E2EE actually applied per the echoed response). Two modes: *recon* (tools on,
+  private-tier models) and *vault* (Venice `e2ee-`/TEE models, no tools).
+- **Uncensored when needed** — handles legitimate-but-hard topics (security research, sensitive
+  journalism, legal/medical) that mainstream agents refuse.
+- **Server-side keys only** — the Venice API key never reaches the browser; per-run spend caps.
+- **Self-funding (planned)** — pay per request via x402 / USDC on Base, so the agent can own its
+  own inference budget.
+
+## Tech
+
+TypeScript · Next.js 16 (App Router) · React 19 · Vitest · Venice OpenAI-compatible API.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.local.example .env.local   # then set VENICE_API_KEY
+npm run dev                         # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Get a key at <https://venice.ai/settings/api> (the API needs an active balance — Pro includes free
+API credit).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm test` — run the unit test suite (Vitest, fully mocked — no API key required)
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+| Layer | Path |
+|---|---|
+| Venice client (chat, embeddings, models, balance) | `src/venice/client.ts` |
+| Model resolver + Privacy Receipts | `src/venice/models.ts`, `src/privacy/receipt.ts` |
+| RAG store + tools (web_search, fetch_url) | `src/rag/store.ts`, `src/tools/` |
+| Orchestrator (planner→executor loop, spend cap) | `src/agent/orchestrator.ts` |
+| Cited dossier builder (strict JSON) | `src/agent/report.ts` |
+| SSE research endpoint (server-side key) | `src/app/api/research/route.ts` |
+| Research console UI | `src/app/page.tsx` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+TBD.

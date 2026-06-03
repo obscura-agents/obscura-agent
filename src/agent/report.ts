@@ -14,7 +14,7 @@ export interface Dossier {
 
 // Strict-mode json_schema: every object lists ALL props in required + additionalProperties:false.
 export const DOSSIER_SCHEMA = {
-  name: "ghostwire_dossier",
+  name: "obscura_dossier",
   strict: true,
   schema: {
     type: "object",
