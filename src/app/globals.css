@@ -152,6 +152,20 @@ a {
 .nav-link:hover {
   color: var(--gold);
 }
+.nav-cta {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  transition: all 0.3s var(--ease);
+}
+.nav-cta:hover {
+  background: rgba(232, 199, 122, 0.1);
+}
 .nav-actions a {
   display: inline-flex;
   transition: color 0.3s var(--ease);
