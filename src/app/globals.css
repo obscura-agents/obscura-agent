@@ -83,6 +83,16 @@ a {
   z-index: 3;
 }
 
+/* centered page wrapper (docs, shared view) */
+.app {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 2.5rem clamp(1.2rem, 5vw, 2rem) 4rem;
+  position: relative;
+  z-index: 3;
+}
+
 /* ---------- top nav ---------- */
 .nav {
   position: sticky;
@@ -991,6 +1001,8 @@ h3 {
 
 /* ---------- docs page ---------- */
 .doc {
+  max-width: 800px;
+  margin: 0 auto;
   padding-bottom: 5rem;
 }
 .doc h1 {
