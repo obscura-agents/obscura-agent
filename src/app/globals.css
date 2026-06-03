@@ -183,6 +183,17 @@ h3 {
   animation: float 3.4s var(--ease) infinite;
 }
 
+/* ---------- brand logo (image) ---------- */
+.brand-mark {
+  width: 150px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 14px rgba(232, 199, 122, 0.22));
+}
+.brand-mark.spin {
+  animation: spin 40s linear infinite;
+}
+
 /* ---------- aperture svg ---------- */
 .aperture {
   display: block;

@@ -1,4 +1,3 @@
-import { Aperture } from "./components/Aperture";
 import { Console } from "./components/Console";
 
 const STEPS = [
@@ -48,7 +47,8 @@ export default function Home() {
       <section className="hero">
         <div className="container">
           <div className="mark" data-reveal style={{ animationDelay: "0.05s" }}>
-            <Aperture size={140} draw spin />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/obscura-logo.png" alt="Obscura Agent" className="brand-mark spin" />
           </div>
           <h1 className="brand" data-reveal style={{ animationDelay: "0.5s" }}>
             Obscura&nbsp;Agent
