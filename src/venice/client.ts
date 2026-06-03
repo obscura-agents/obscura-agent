@@ -107,6 +107,19 @@ export class VeniceClient {
     });
   }
 
+  /**
+   * Query the TEE attestation for an e2ee model. Returns whether Venice reports it verified.
+   * NOTE: this endpoint is docs-described but should be confirmed live; callers must degrade
+   * gracefully (treat anything but a clear `verified:true` as not verified).
+   */
+  async getAttestation(model: string, nonce?: string): Promise<{ verified: boolean }> {
+    const n = nonce ?? "0".repeat(64);
+    const out = await this.get<{ verified?: boolean }>(
+      `/tee/attestation?model=${encodeURIComponent(model)}&nonce=${n}`,
+    );
+    return { verified: out.verified === true };
+  }
+
   async getBalance(): Promise<Balance> {
     const out = await this.get<{ data: { accessPermitted: boolean; balances: { USD: number; DIEM: number } } }>(
       "/api_keys/rate_limits",

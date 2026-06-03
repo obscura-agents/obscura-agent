@@ -54,4 +54,17 @@ describe("runVaultSynthesis", () => {
     expect(out.receipt.e2ee_applied).toBe(false);
     expect(out.receipt.attestation).toBe("not_requested");
   });
+
+  it("upgrades attestation to 'verified' when the TEE endpoint confirms it", async () => {
+    const chat = vi.fn().mockResolvedValue({
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "x" } }],
+      venice_parameters: { enable_e2ee: true },
+    });
+    const getAttestation = vi.fn().mockResolvedValue({ verified: true });
+    const client = { chat, getAttestation } as unknown as VeniceClient;
+
+    const out = await runVaultSynthesis(client, vaultModel, dossier, () => "t");
+    expect(out.receipt.attestation).toBe("verified");
+    expect(getAttestation).toHaveBeenCalledWith("e2ee-glm-5-1");
+  });
 });

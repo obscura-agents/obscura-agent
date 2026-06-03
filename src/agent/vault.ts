@@ -48,5 +48,15 @@ export async function runVaultSynthesis(
     now: ts,
   });
 
+  // If E2EE actually applied, try to upgrade the receipt to cryptographically verified.
+  if (receipt.attestation === "pending") {
+    try {
+      const att = await client.getAttestation(vaultModel.id);
+      if (att.verified) receipt.attestation = "verified";
+    } catch {
+      // Endpoint unavailable / unverified — honestly stay "pending".
+    }
+  }
+
   return { text: res.choices[0]?.message.content ?? "", receipt };
 }
