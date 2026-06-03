@@ -1,8 +1,9 @@
 :root {
-  --bg: #0a0b0f;
-  --fg: #e6e6ee;
-  --muted: #8a8aa0;
-  --accent: #00e0c6;
+  --bg: #0a0b0f; /* void black */
+  --fg: #ece8e0; /* warm off-white */
+  --muted: #8a8076; /* warm gray */
+  --accent: #e8c77a; /* champagne gold */
+  --glow: #f2e2bd; /* warm white-gold */
 }
 * {
   box-sizing: border-box;
@@ -20,7 +21,8 @@ body {
 }
 h1 {
   color: var(--accent);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  font-weight: 400;
 }
 .tagline {
   color: var(--muted);
@@ -36,15 +38,15 @@ h1 {
 .composer input {
   flex: 1;
   padding: 0.6rem;
-  background: #13141b;
-  border: 1px solid #23242e;
+  background: #15130d;
+  border: 1px solid #2a261c;
   color: var(--fg);
   border-radius: 6px;
 }
 .composer button {
   padding: 0.6rem 1rem;
   background: var(--accent);
-  color: #001b18;
+  color: #14110a;
   border: 0;
   border-radius: 6px;
   cursor: pointer;
@@ -68,17 +70,19 @@ h1 {
   flex-wrap: wrap;
   font-size: 0.8rem;
   padding: 0.4rem 0;
-  border-bottom: 1px solid #1a1b22;
+  border-bottom: 1px solid #1c1a14;
 }
+/* recon mode = warm gold (active, tool-using) */
 .badge {
   padding: 0 0.4rem;
   border-radius: 4px;
-  background: #1f3a36;
+  background: #2a2417;
   color: var(--accent);
 }
+/* vault mode = cool violet (locked-down, E2EE) */
 .badge.vault {
-  background: #3a1f37;
-  color: #ff7ae0;
+  background: #221d33;
+  color: #b9a3ff;
 }
 .muted {
   color: var(--muted);
