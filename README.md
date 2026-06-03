@@ -1,8 +1,20 @@
-# Obscura Agent
+<div align="center">
 
-**The autonomous research agent that leaves no trace.** Powered by [Venice](https://venice.ai).
+<img src="public/obscura-logo.png" alt="Obscura Agent" width="140" />
 
-🔗 **Live:** <https://obscura-agent.vercel.app> — try the "Watch a live demo" button (no key needed), or bring your own Venice key.
+<h1>Obscura Agent</h1>
+
+<p><strong>The autonomous research agent that leaves no trace.</strong><br/>Powered by <a href="https://venice.ai">Venice</a>.</p>
+
+<p>
+  <a href="https://github.com/obscura-agents/obscura-agent/actions/workflows/ci.yml"><img src="https://github.com/obscura-agents/obscura-agent/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-e8c77a.svg" alt="License: MIT" /></a>
+  <a href="https://venice.ai"><img src="https://img.shields.io/badge/Powered%20by-Venice-e8c77a.svg" alt="Powered by Venice" /></a>
+</p>
+
+<p>🔗 <strong>Live:</strong> <a href="https://obscura-agent.vercel.app">obscura-agent.vercel.app</a> — try <em>"Watch a live demo"</em> (no key needed), or bring your own Venice key.</p>
+
+</div>
 
 Obscura Agent is a privacy-first, agentic research tool built on the Venice.ai API. Give it a
 question; it autonomously plans, searches and scrapes the web, builds a private memory, and returns
@@ -81,4 +93,4 @@ Set `OBSCURA_PAYMENT_MODE` (server), or let users bring their own:
 
 ## License
 
-TBD.
+MIT — see [LICENSE](LICENSE).

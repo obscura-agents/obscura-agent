@@ -2,6 +2,23 @@
   "name": "obscura-agent",
   "version": "0.1.0",
   "private": true,
+  "description": "The autonomous research agent that leaves no trace. Private, cited research on Venice.ai.",
+  "license": "MIT",
+  "homepage": "https://obscura-agent.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/obscura-agents/obscura-agent.git"
+  },
+  "keywords": [
+    "venice",
+    "ai-agent",
+    "privacy",
+    "research-agent",
+    "x402",
+    "mcp",
+    "uncensored",
+    "e2ee"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
