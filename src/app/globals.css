@@ -130,6 +130,8 @@ h3 {
 }
 .hero .mark {
   margin-bottom: 2.4rem;
+  display: flex;
+  justify-content: center;
 }
 .brand {
   font-family: var(--font-display);
