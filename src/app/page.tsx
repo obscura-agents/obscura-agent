@@ -1,5 +1,3 @@
-import { Console } from "./components/Console";
-
 const STEPS = [
   { n: "01", t: "Plan", d: "Decomposes your question into a multi-step investigation." },
   { n: "02", t: "Gather", d: "Searches and scrapes the open web, keeping every citation." },
@@ -68,25 +66,19 @@ export default function Home() {
               Powered by <span className="venice">Venice</span>
             </span>
           </div>
-        </div>
-        <a className="scroll-cue" href="#try">
-          try it ↓
-        </a>
-      </section>
 
-      {/* ---------- console ---------- */}
-      <section className="section" id="try">
-        <div className="container">
-          <div className="section-head" data-reveal>
-            <span className="eyebrow">Run an investigation</span>
-            <h2>Watch it work, in the open.</h2>
-            <p>
-              Ask a question. Every step it takes leaves a privacy receipt; the result is a dossier
-              you can trust, with sources you can check.
-            </p>
+          <div className="cta-row" data-reveal style={{ animationDelay: "1.15s" }}>
+            <a className="cta cta-primary" href="/app">
+              Launch the agent →
+            </a>
+            <a className="cta cta-ghost" href="/docs">
+              Read the docs
+            </a>
           </div>
-          <Console />
         </div>
+        <a className="scroll-cue" href="#how">
+          how it works ↓
+        </a>
       </section>
 
       {/* ---------- how it works ---------- */}
@@ -123,6 +115,21 @@ export default function Home() {
                 <p>{f.d}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- closing cta ---------- */}
+      <section className="section closing">
+        <div className="container">
+          <h2>Investigate anything. Leave no trace.</h2>
+          <div className="cta-row">
+            <a className="cta cta-primary" href="/app">
+              Launch the agent →
+            </a>
+            <a className="cta cta-ghost" href="/docs">
+              Read the docs
+            </a>
           </div>
         </div>
       </section>

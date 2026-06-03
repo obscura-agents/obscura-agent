@@ -265,6 +265,49 @@ h3 {
   animation: float 3.4s var(--ease) infinite;
 }
 
+/* ---------- CTAs ---------- */
+.cta-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.4rem;
+}
+.cta {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.7rem;
+  border-radius: 3px;
+  transition: all 0.3s var(--ease);
+}
+.cta-primary {
+  background: var(--gold);
+  color: #14110a;
+  border: 1px solid var(--gold);
+}
+.cta-primary:hover {
+  box-shadow: 0 0 32px -8px rgba(232, 199, 122, 0.65);
+  transform: translateY(-1px);
+}
+.cta-ghost {
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+.cta-ghost:hover {
+  background: rgba(232, 199, 122, 0.08);
+}
+.app-page {
+  padding: 3rem 0 5rem;
+}
+.section.closing {
+  text-align: center;
+}
+.section.closing h2 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+
 /* ---------- brand logo (image) ---------- */
 .brand-mark {
   width: clamp(200px, 26vw, 300px);
