@@ -77,6 +77,30 @@ describe("runInvestigation", () => {
     expect((client.chat as any)).not.toHaveBeenCalled();
   });
 
+  it("uses an explicit modelId override (e.g. an uncensored model)", async () => {
+    const chat = vi.fn().mockResolvedValue({
+      choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "ok" } }],
+      venice_parameters: { enable_e2ee: false },
+    });
+    const client = {
+      chat,
+      embed: vi.fn(),
+      getBalance: vi.fn().mockResolvedValue({ usd: 10, diem: 1, accessPermitted: true }),
+    } as unknown as VeniceClient;
+
+    await runInvestigation({
+      client,
+      models: models as any,
+      question: "x",
+      modelId: "venice-uncensored-1-2",
+      maxSteps: 2,
+      minUsd: 0.5,
+      now: () => "t",
+    });
+
+    expect(chat.mock.calls[0][0].model).toBe("venice-uncensored-1-2");
+  });
+
   it("does not hard-fail when getBalance throws (e.g. inference-only key cannot read rate limits)", async () => {
     const chat = vi.fn().mockResolvedValue({
       choices: [{ finish_reason: "stop", index: 0, message: { role: "assistant", content: "ok" } }],

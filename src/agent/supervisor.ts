@@ -101,6 +101,7 @@ export async function runSupervised(args: SupervisedArgs): Promise<RunResult> {
         maxSteps: args.maxSteps,
         minUsd: args.minUsd,
         now: args.now,
+        modelId: args.modelId,
       }),
     ),
   );

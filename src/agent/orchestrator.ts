@@ -14,6 +14,8 @@ export interface RunArgs {
   maxSteps?: number;
   minUsd?: number;
   now?: () => string;
+  /** Override the recon model id (e.g. an uncensored model). Defaults to the trait-resolved default. */
+  modelId?: string;
 }
 
 export type StoppedReason = "completed" | "max_steps" | "spend_cap";
@@ -36,8 +38,8 @@ export async function runInvestigation(args: RunArgs): Promise<RunResult> {
   const maxSteps = args.maxSteps ?? 8;
   const minUsd = args.minUsd ?? 0.25;
   const defaults = resolveDefaults(args.models);
-  const reconModel = args.models.find((m) => m.id === defaults.tools) ?? args.models[0];
-  const modelId = defaults.tools;
+  const modelId = args.modelId ?? defaults.tools;
+  const reconModel = args.models.find((m) => m.id === modelId) ?? args.models[0];
 
   const store = new VectorStore();
   const citations: WebSearchCitation[] = [];

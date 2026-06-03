@@ -27,6 +27,8 @@ export interface SessionArgs {
   withMultiAgent?: boolean;
   /** Max specialist agents in multi-agent mode (default 3). */
   maxAgents?: number;
+  /** Recon model preference: "default" (balanced) or "uncensored". */
+  modelPref?: "default" | "uncensored";
   /** When true, run an adversarial skeptic pass that judges each finding before the dossier. */
   withVerify?: boolean;
   /** When true, run a final E2EE "vault" synthesis through an e2ee- model. */
@@ -44,6 +46,7 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
     type: "status",
     message: a.withMultiAgent ? "Dispatching specialist agents…" : "Investigating…",
   });
+  const reconModelId = a.modelPref === "uncensored" ? defaults.uncensored : undefined;
   const run = a.withMultiAgent
     ? await runSupervised({
         client: a.client,
@@ -51,9 +54,16 @@ export async function runResearchSession(a: SessionArgs): Promise<void> {
         question: a.question,
         now: a.now,
         maxAgents: a.maxAgents,
+        modelId: reconModelId,
         onPlan: (subtasks) => a.emit({ type: "plan", subtasks }),
       })
-    : await runInvestigation({ client: a.client, models, question: a.question, now: a.now });
+    : await runInvestigation({
+        client: a.client,
+        models,
+        question: a.question,
+        now: a.now,
+        modelId: reconModelId,
+      });
   for (const receipt of run.receipts) a.emit({ type: "receipt", receipt });
   a.emit({ type: "answer", text: run.finalAnswer });
 

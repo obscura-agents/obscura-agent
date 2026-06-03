@@ -525,6 +525,13 @@ h3 {
   color: var(--muted-2);
 }
 
+/* export bar */
+.export-bar {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* dispatched-agents plan */
 .plan {
   margin-top: 1.6rem;

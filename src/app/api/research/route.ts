@@ -5,10 +5,11 @@ import { runResearchSession, type ResearchEvent } from "../../../agent/session";
 // Route Handlers are not cached by default, which is what we want for a live stream.
 
 export async function POST(req: Request): Promise<Response> {
-  const { question, veniceApiKey, deep } = (await req.json()) as {
+  const { question, veniceApiKey, deep, model } = (await req.json()) as {
     question?: string;
     veniceApiKey?: string;
     deep?: boolean;
+    model?: "default" | "uncensored";
   };
   if (!question) return new Response("Missing 'question'", { status: 400 });
 
@@ -30,6 +31,7 @@ export async function POST(req: Request): Promise<Response> {
           client,
           question,
           emit: send,
+          modelPref: model,
           withMultiAgent: !!deep,
           withVerify: true,
           withVault: true,

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { ReceiptPanel } from "./ReceiptPanel";
 import { DossierView } from "./DossierView";
+import { dossierToMarkdown } from "../../agent/exportDossier";
 import type { PrivacyReceipt } from "../../privacy/receipt";
 import type { Dossier } from "../../agent/report";
 
@@ -22,7 +23,19 @@ export function Console() {
   const [vaultText, setVaultText] = useState<string>("");
   const [plan, setPlan] = useState<string[]>([]);
   const [deep, setDeep] = useState(false);
+  const [model, setModel] = useState<"default" | "uncensored">("default");
   const [running, setRunning] = useState(false);
+
+  function downloadMd() {
+    if (!dossier) return;
+    const md = dossierToMarkdown(question, dossier, vaultText || undefined);
+    const url = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "obscura-dossier.md";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   // BYOK — bring your own Venice key (stored only in this browser).
   const [useOwnKey, setUseOwnKey] = useState(false);
@@ -59,7 +72,7 @@ export function Console() {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, deep, ...byok }),
+        body: JSON.stringify({ question: q, deep, model, ...byok }),
       });
 
       if (!res.ok || !res.body) {
@@ -176,6 +189,22 @@ export function Console() {
           </span>
         </div>
 
+        <div className="deepmode">
+          <div className="keymode-toggle">
+            <button type="button" className={model === "default" ? "on" : ""} onClick={() => setModel("default")}>
+              Balanced
+            </button>
+            <button
+              type="button"
+              className={model === "uncensored" ? "on" : ""}
+              onClick={() => setModel("uncensored")}
+            >
+              Uncensored
+            </button>
+          </div>
+          <span className="deepmode-note">uncensored = won&apos;t refuse legitimate-but-hard topics</span>
+        </div>
+
         <p className={`status${isError ? " err" : ""}`}>
           {status}
           {running && <span className="blink"> ▍</span>}
@@ -230,6 +259,14 @@ export function Console() {
           <div className="results">
             <ReceiptPanel receipts={receipts} />
             <DossierView dossier={dossier} running={running} />
+          </div>
+        )}
+
+        {dossier && (
+          <div className="export-bar">
+            <button type="button" className="btn" onClick={downloadMd}>
+              ⬇ Download .md
+            </button>
           </div>
         )}
       </div>
